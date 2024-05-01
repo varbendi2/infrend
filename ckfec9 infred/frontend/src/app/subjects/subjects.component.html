@@ -1,0 +1,75 @@
+<div class="container">
+    <h2>Témák</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title">Témalista</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        <li *ngFor="let subject of subjects" class="list-group-item" (click)="onSelect(subject)">
+                            {{ subject.name }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title">Kiválasztott Téma</h5>
+                </div>
+                <div class="card-body">
+                    <div *ngIf="selectedSubject">
+                        <h6 class="card-subtitle mb-2">{{ selectedSubject.name }}</h6>
+                        <p class="card-text">Azonosító: {{ selectedSubject.id }}</p>
+                        <button class="btn btn-danger mt-3" (click)="deleteSubject(selectedSubject.id)">Téma Törlése</button>
+                    </div>
+                    <div *ngIf="!selectedSubject">
+                        <p>Válasszon egy témát a listából a részletek megtekintéséhez.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title">Téma létrehozása</h5>
+                </div>
+                <div class="card-body">
+                    <form (submit)="createSubject()">
+                        <div class="form-group">
+                            <label for="subjectName">Név</label>
+                            <input type="text" class="form-control" id="subjectName" [(ngModel)]="newSubject.name" name="name" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Létrehozás</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title">Téma Frissítése</h5>
+                </div>
+                <div class="card-body">
+                    <div *ngIf="selectedSubject">
+                        <form (submit)="updateSubject(selectedSubject.id)">
+                            <div class="form-group">
+                                <label for="subjectName">Név</label>
+                                <input type="text" class="form-control" id="subjectName" [(ngModel)]="selectedSubject.name" name="name" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Frissítés</button>
+                        </form>
+                    </div>
+                    <div *ngIf="!selectedSubject">
+                        <p>Nincs kiválasztott téma.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

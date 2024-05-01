@@ -1,0 +1,67 @@
+<div class="container mt-3">
+  <h2>Osztályzat Kezelés</h2>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h3>Osztályzatok</h3>
+      <ul class="list-group">
+        <li class="list-group-item" *ngFor="let grade of grades">
+          Osztályzat: {{ grade.grade }}, Azonosító: {{ grade.id }}
+        </li>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <h3>Új Osztályzat Hozzárendelése</h3>
+      <form (submit)="createGrade()">
+        <div class="form-group">
+          <label for="grade">Osztályzat:</label>
+          <input type="number" class="form-control" id="grade" [(ngModel)]="newGrade.grade" name="grade" required>
+        </div>
+        <div class="form-group">
+          <label for="studentId">Tanuló:</label>
+          <select class="form-control" id="studentId" [(ngModel)]="newGrade.student.id" name="studentId" required>
+            <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="courseId">Kurzus:</label>
+          <select class="form-control" id="courseId" [(ngModel)]="newGrade.course.id" name="courseId" required>
+            <option *ngFor="let course of courses" [value]="course.id">{{ course.name }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="subjectId">Tantárgy:</label>
+          <select class="form-control" id="subjectId" [(ngModel)]="newGrade.subject.id" name="subjectId" required>
+            <option *ngFor="let subject of subjects" [value]="subject.id">{{ subject.name }}</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Osztályzat Hozzárendelése</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <h3>Kurzusonkénti Átlagos Osztályzat</h3>
+      <div>
+        <label for="courseIdInput">Kurzus:</label>
+        <select class="form-control" id="courseIdInput" [(ngModel)]="courseIdInput" name="courseIdInput">
+          <option *ngFor="let course of courses" [value]="course.id">{{ course.name }}</option>
+        </select>
+        <button class="btn btn-primary mt-2" (click)="courseIdInput !== null && getAverageGradeByCourse(courseIdInput)">Átlagos Osztályzat Lekérése</button>
+        <div *ngIf="averageGradeByCourse !== null">Átlagos Osztályzat: {{ +averageGradeByCourse }}</div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <h3>Tanulónkénti Átlagos Osztályzat</h3>
+      <div>
+        <label for="studentIdInput">Tanuló:</label>
+        <select class="form-control" id="studentIdInput" [(ngModel)]="studentIdInput" name="studentIdInput">
+          <option *ngFor="let student of students" [value]="student.id">{{ student.name }}</option>
+        </select>
+        <button class="btn btn-primary mt-2" (click)="studentIdInput !== null && getAverageGradeByStudent(studentIdInput)">Átlagos Osztályzat Lekérése</button>
+        <div *ngIf="averageGradeByStudent !== null">Átlagos Osztályzat: {{ +averageGradeByStudent }}</div>
+      </div>
+    </div>
+  </div>
+</div>

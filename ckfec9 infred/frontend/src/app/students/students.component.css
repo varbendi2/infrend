@@ -1,0 +1,15 @@
+.container.mt-3 {
+    background-color: rgb(210, 210, 224);
+    border-radius: 25px;
+    padding: 20px;
+  }
+
+  .btn.btn-primary {
+    margin-top: 10px;
+  }
+
+  h3 {
+    text-align: center;
+    border: 2px solid #000000;
+    border-radius: 25px;
+  }
