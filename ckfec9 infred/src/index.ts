@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import express from "express";
-import { createConnection, getRepository } from "typeorm";
+import { createConnection, getRepository, MoreThan, LessThan, Between } from "typeorm";
 import { Request, Response } from "express";
 import { Student } from "./entity/Student";
 import { Course } from "./entity/Course";
@@ -15,22 +15,22 @@ createConnection().then(async connection => {
     app.use(express.json());
     app.use(cors());
 
-    // Diákok lekérdezése
+    // Endpoint az összes diák lekéréséhez
     app.get("/students", async (req: Request, res: Response) => {
         try {
             const studentRepository = getRepository(Student);
             const students = await studentRepository.find({ relations: ["courses", "grades"] });
             res.json(students);
         } catch (err) {
-            res.status(500).json({ error: "Hiba történt a diákok lekérdezése közben." });
+            res.status(500).json({ error: "Hiba történt a diákok lekérése közben." });
         }
     });
 
-    // Új diák hozzáadása
+    // Új diák létrehozása
     app.post("/students", async (req: Request, res: Response) => {
         try {
             const studentRepository = getRepository(Student);
-            const newStudent = studentRepository.create(req.body); // feltételezve, hogy a body megfelelő formátumú
+            const newStudent = studentRepository.create(req.body); // Feltételezve, hogy a body megfelelő formátumban van
             const results = await studentRepository.save(newStudent);
             res.status(201).json(results);
         } catch (err) {
@@ -38,7 +38,7 @@ createConnection().then(async connection => {
         }
     });
 
-    // Egy diák lekérdezése az azonosítója alapján
+    // Egy diák lekérése ID alapján
     app.get("/students/:studentId", async (req: Request, res: Response) => {
         try {
             const studentRepository = getRepository(Student);
@@ -54,11 +54,11 @@ createConnection().then(async connection => {
                 res.status(404).json({ error: "Diák nem található" });
             }
         } catch (err) {
-            res.status(500).json({ error: "Hiba történt a diák lekérdezése közben." });
+            res.status(500).json({ error: "Hiba történt a diák lekérése közben." });
         }
     });
 
-    // Egy diák frissítése
+    // Diák frissítése ID alapján
     app.put("/students/:studentId", async (req: Request, res: Response) => {
         try {
             const studentRepository = getRepository(Student);
@@ -67,7 +67,7 @@ createConnection().then(async connection => {
             });
     
             if (student) {
-                studentRepository.merge(student, req.body); // új értékek összefésülése a req.body-ból a megtalált diákba
+                studentRepository.merge(student, req.body); // Összefésüli az új értékeket a req.body-ból a megtalált diákba
                 const results = await studentRepository.save(student);
                 res.json(results);
             } else {
@@ -78,7 +78,7 @@ createConnection().then(async connection => {
         }
     });
 
-    // Diák törlése
+    // Diák törlése ID alapján
     app.delete("/students/:studentId", async (req: Request, res: Response) => {
         try {
             const studentRepository = getRepository(Student);
@@ -92,30 +92,30 @@ createConnection().then(async connection => {
                 res.status(404).json({ error: "Diák nem található" });
             }
         } catch (err) {
-            res.status(500).json({ error: "Hiba történt a diák eltávolítása közben." });
+            res.status(500).json({ error: "Hiba történt a diák törlése közben." });
         }
     });
 
-    // Tanárok lekérdezése
+    // Tanárok lekérése
     app.get("/teachers", async (req: Request, res: Response) => {
         try {
             const teacherRepository = getRepository(Teacher);
             const teachers = await teacherRepository.find({ relations: ["subjects"] });
             res.json(teachers);
         } catch (err) {
-            res.status(500).json({ error: "Hiba történt a tanárok lekérdezése közben." });
+            res.status(500).json({ error: "Hiba történt a tanárok lekérése közben." });
         }
     });
 
-    // Új tanár hozzáadása
+    // Tanár létrehozása
     app.post("/teachers", async (req: Request, res: Response) => {
         const teacherRepository = getRepository(Teacher);
-        const teacher = teacherRepository.create(req.body); // új tanár példány létrehozása
-        const results = await teacherRepository.save(teacher); // tanár példány mentése
+        const teacher = teacherRepository.create(req.body); // Új tanár példány létrehozása
+        const results = await teacherRepository.save(teacher); // A tanár példány mentése
         res.json(results);
     });
 
-    // Egy tanár lekérdezése az azonosítója alapján
+    // Tanár lekérése ID alapján
     app.get("/teachers/:teacherId", async (req: Request, res: Response) => {
         const teacherRepository = getRepository(Teacher);
         const teacher = await teacherRepository.findOne({ 
@@ -132,7 +132,7 @@ createConnection().then(async connection => {
         }
     });
 
-    // Tanár frissítése
+    // Tanár frissítése ID alapján
     app.put("/teachers/:teacherId", async (req: Request, res: Response) => {
         const teacherRepository = getRepository(Teacher);
         const teacher = await teacherRepository.findOne({ 
@@ -149,7 +149,7 @@ createConnection().then(async connection => {
         }
     });
 
-    // Tanár törlése
+    // Tanár törlése ID alapján
     app.delete("/teachers/:teacherId", async (req: Request, res: Response) => {
         const teacherRepository = getRepository(Teacher);
         const teacher = await await teacherRepository.findOne({ 
@@ -164,14 +164,14 @@ createConnection().then(async connection => {
         }
     });
 
-    // Kurzusok lekérdezése
+    // Tanfolyamok lekérése
     app.get("/courses", async (req: Request, res: Response) => {
         const courseRepository = getRepository(Course);
         const courses = await courseRepository.find({ relations: ["students","subject"] });
         res.json(courses);
     });
 
-    // Új kurzus hozzáadása
+    // Tanfolyam létrehozása
     app.post("/courses", async (req: Request, res: Response) => {
         const courseRepository = getRepository(Course);
         const course = courseRepository.create(req.body);
@@ -179,7 +179,7 @@ createConnection().then(async connection => {
         res.json(results);
     });  
 
-    // Egy kurzus lekérdezése az azonosítója alapján
+    // Tanfolyam lekérése ID alapján
     app.get("/courses/:courseId", async (req: Request, res: Response) => {
         const courseRepository = getRepository(Course);
         const course = await courseRepository.findOne({ 
@@ -191,11 +191,11 @@ createConnection().then(async connection => {
         if (course) {
             res.json(course);
         } else {
-            res.status(404).json({ error: "Kurzus nem található" });
+            res.status(404).json({ error: "Tanfolyam nem található" });
         }
     });
 
-    // Kurzus frissítése
+    // Tanfolyam frissítése ID alapján
     app.put("/courses/:courseId", async (req: Request, res: Response) => {
         const courseRepository = getRepository(Course);
         const course = await courseRepository.findOne({ 
@@ -207,11 +207,11 @@ createConnection().then(async connection => {
             const results = await courseRepository.save(course);
             res.json(results);
         } else {
-            res.status(404).json({ error: "Kurzus nem található" });
+            res.status(404).json({ error: "Tanfolyam nem található" });
         }
     });
 
-    // Kurzus törlése
+    // Tanfolyam törlése ID alapján
     app.delete("/courses/:courseId", async (req: Request, res: Response) => {
         const courseRepository = getRepository(Course);
         const course = await courseRepository.findOne({ 
@@ -219,13 +219,13 @@ createConnection().then(async connection => {
         });
         if (course) {
             await courseRepository.remove(course);
-            res.json({ message: "Kurzus eltávolítva" });
+            res.json({ message: "Tanfolyam eltávolítva" });
         } else {
-            res.status(404).json({ error: "Kurzus nem található" });
+            res.status(404).json({ error: "Tanfolyam nem található" });
         }
     });
     
-    // Tárgyhoz kurzus hozzáadása
+    // Tanfolyam hozzáadása tantárgyhoz
     app.post('/subjects/addcourse/:subjectId/:courseId', async (req: Request, res: Response) => {
         const { subjectId, courseId } = req.params;
       
@@ -233,37 +233,37 @@ createConnection().then(async connection => {
         const courseRepository = getRepository(Course);
       
         try {
-          // Tárgy keresése azonosító alapján
+          // Tantárgy keresése ID alapján
           const subject = await subjectRepository.findOne({ 
             where: { id: Number(req.params.subjectId) }, 
             relations: ["courses"]
         });
       
           if (!subject) {
-            return res.status(404).json({ error: 'Tárgy nem található' });
+            return res.status(404).json({ error: 'Tantárgy nem található' });
           }
       
-          // Kurzus keresése azonosító alapján
+          // Tanfolyam keresése ID alapján
           const course = await courseRepository.findOne({ 
             where: { id: Number(req.params.courseId) }, 
             relations: ["subject"]
         });
       
           if (!course) {
-            return res.status(404).json({ error: 'Kurzus nem található' });
+            return res.status(404).json({ error: 'Tanfolyam nem található' });
           }
       
-          // Kurzus hozzáadása a tárgyhoz, ha még nem lett hozzáadva
+          // Hozzáadja a tanfolyamot a tantárgyhoz, ha még nem volt hozzáadva
           const isCourseAdded = subject.courses.some((c) => c.id === course.id);
           if (!isCourseAdded) {
             subject.courses.push(course);
           }
       
-          // Tárgy mentése az adatbázisba
+          // Tantárgy mentése az adatbázisba
           await subjectRepository.save(subject);
       
-          // Sikerüzenet visszaküldése
-          return res.status(200).json({ message: 'Kurzus hozzáadva a tárgyhoz' });
+          // Sikeres válasz visszaadása
+          return res.status(200).json({ message: 'Tanfolyam hozzáadva a tantárgyhoz' });
         } catch (error) {
           // Hiba kezelése
           console.error(error);
@@ -271,7 +271,7 @@ createConnection().then(async connection => {
         }
       });
 
-    // Kurzus eltávolítása a tárgyból
+    // Tanfolyam eltávolítása tantárgyból
     app.delete('/subjects/removecourse/:subjectId/:courseId', async (req: Request, res: Response) => {
         const { subjectId, courseId } = req.params;
       
@@ -279,40 +279,40 @@ createConnection().then(async connection => {
         const courseRepository = getRepository(Course);
       
         try {
-          // Tárgy keresése azonosító alapján
+          // Tantárgy keresése ID alapján
           const subject = await subjectRepository.findOne({ 
             where: { id: Number(req.params.subjectId) }, 
             relations: ["courses"]
         });
       
           if (!subject) {
-            return res.status(404).json({ error: 'Tárgy nem található' });
+            return res.status(404).json({ error: 'Tantárgy nem található' });
           }
       
-          // Kurzus keresése azonosító alapján
+          // Tanfolyam keresése ID alapján
           const course = await courseRepository.findOne({ 
             where: { id: Number(req.params.courseId) }, 
             relations: ["subject"]
         });
       
           if (!course) {
-            return res.status(404).json({ error: 'Kurzus nem található' });
+            return res.status(404).json({ error: 'Tanfolyam nem található' });
           }
       
-          // Ellenőrzés, hogy a kurzus már hozzá van-e adva a tárgyhoz
+          // Ellenőrzi, hogy a tanfolyam már hozzá van-e adva a tantárgyhoz
           const courseIndex = subject.courses.findIndex((c) => c.id === course.id);
           if (courseIndex === -1) {
-            return res.status(404).json({ error: 'A kurzus nincs társítva a tárgyhoz' });
+            return res.status(404).json({ error: 'A tanfolyam nincs hozzárendelve a tantárgyhoz' });
           }
       
-          // Kurzus eltávolítása a tárgyból
+          // Tanfolyam eltávolítása a tantárgyból
           subject.courses.splice(courseIndex, 1);
       
-          // Tárgy mentése az adatbázisba
+          // Tantárgy mentése az adatbázisba
           await subjectRepository.save(subject);
       
-          // Sikerüzenet visszaküldése
-          return res.status(200).json({ message: 'Kurzus eltávolítva a tárgyból' });
+          // Sikeres válasz visszaadása
+          return res.status(200).json({ message: 'Tanfolyam eltávolítva a tantárgyból' });
         } catch (error) {
           // Hiba kezelése
           console.error(error);
@@ -320,25 +320,25 @@ createConnection().then(async connection => {
         }
       });
 
-      // Diák hozzáadása a kurzushoz
-      app.post('/courses/addstudent/:courseId/:studentId', async (req: Request, res: Response) => {
+    // Diák hozzáadása tanfolyamhoz
+    app.post('/courses/addstudent/:courseId/:studentId', async (req: Request, res: Response) => {
         const { courseId, studentId } = req.params;
       
         const courseRepository = getRepository(Course);
         const studentRepository = getRepository(Student);
       
         try {
-          // Kurzus keresése azonosító alapján
+          // Tanfolyam keresése ID alapján
           const course = await courseRepository.findOne({ 
             where: { id: Number(req.params.courseId) }, 
             relations: ["students"]
         });
       
           if (!course) {
-            return res.status(404).json({ error: 'Kurzus nem található' });
+            return res.status(404).json({ error: 'Tanfolyam nem található' });
           }
       
-          // Diák keresése azonosító alapján
+          // Diák keresése ID alapján
           const student = await studentRepository.findOne({ 
             where: { id: Number(req.params.studentId) }, 
             relations: ["courses"]
@@ -348,20 +348,20 @@ createConnection().then(async connection => {
             return res.status(404).json({ error: 'Diák nem található' });
           }
       
-          // Ellenőrzés, hogy a diák már felvette-e a kurzust
+          // Ellenőrzi, hogy a diák már felvette-e a tanfolyamot
           const hasTakenCourse = student.courses.some((c) => c.id === course.id);
           if (hasTakenCourse) {
-            return res.status(400).json({ error: 'A diák már felvette a kurzust' });
+            return res.status(400).json({ error: 'A diák már felvette a tanfolyamot' });
           }
       
-          // Diák hozzáadása a kurzushoz
+          // Diák hozzáadása a tanfolyamhoz
           course.students.push(student);
       
-          // Kurzus mentése az adatbázisba
+          // Tanfolyam mentése az adatbázisba
           await courseRepository.save(course);
       
-          // Sikerüzenet visszaküldése
-          return res.status(200).json({ message: 'Diák hozzáadva a kurzushoz' });
+          // Sikeres válasz visszaadása
+          return res.status(200).json({ message: 'Diák hozzáadva a tanfolyamhoz' });
         } catch (error) {
           // Hiba kezelése
           console.error(error);
@@ -369,15 +369,15 @@ createConnection().then(async connection => {
         }
       });
       
-      // Diák eltávolítása a kurzusból
-      app.delete('/courses/removestudent/:courseId/:studentId', async (req: Request, res: Response) => {
+    // Diák eltávolítása tanfolyamból
+    app.delete('/courses/removestudent/:courseId/:studentId', async (req: Request, res: Response) => {
         const { courseId, studentId } = req.params;
       
         const courseRepository = getRepository(Course);
         const studentRepository = getRepository(Student);
       
         try {
-          // Kurzus keresése azonosító alapján
+          // Tanfolyam keresése ID alapján
           const course = await courseRepository.findOne({ 
             where: { id: Number(req.params.courseId) }, 
             relations: ["students"]
@@ -385,10 +385,10 @@ createConnection().then(async connection => {
       
       
           if (!course) {
-            return res.status(404).json({ error: 'Kurzus nem található' });
+            return res.status(404).json({ error: 'Tanfolyam nem található' });
           }
       
-          // Diák keresése azonosító alapján
+          // Diák keresése ID alapján
           const student = await studentRepository.findOne({ 
             where: { id: Number(req.params.studentId) }, 
         });
@@ -398,20 +398,20 @@ createConnection().then(async connection => {
             return res.status(404).json({ error: 'Diák nem található' });
           }
       
-          // Ellenőrzés, hogy a diák már hozzá van-e adva a kurzushoz
+          // Ellenőrzi, hogy a diák már hozzá van-e adva a tanfolyamhoz
           const studentIndex = course.students.findIndex((s) => s.id === student.id);
           if (studentIndex === -1) {
-            return res.status(404).json({ error: 'A diák nincs beiratkozva a kurzusba' });
+            return res.status(404).json({ error: 'A diák nincs beiratkozva a tanfolyamra' });
           }
       
-          // Diák eltávolítása a kurzusból
+          // Diák eltávolítása a tanfolyamból
           course.students.splice(studentIndex, 1);
       
-          // Kurzus mentése az adatbázisba
+          // Tanfolyam mentése az adatbázisba
           await courseRepository.save(course);
       
-          // Sikerüzenet visszaküldése
-          return res.status(200).json({ message: 'Diák eltávolítva a kurzusból' });
+          // Sikeres válasz visszaadása
+          return res.status(200).json({ message: 'Diák eltávolítva a tanfolyamból' });
         } catch (error) {
           // Hiba kezelése
           console.error(error);
@@ -419,16 +419,15 @@ createConnection().then(async connection => {
         }
       });
       
-    
 
-    // Tárgyak lekérdezése
+    // Tantárgyak lekérése
     app.get("/subjects", async (req: Request, res: Response) => {
         const subjectRepository = getRepository(Subject);
         const subjects = await subjectRepository.find({ relations: ["courses"] });
         res.json(subjects);
     });
 
-    // Új tárgy hozzáadása
+    // Tantárgy létrehozása
     app.post("/subjects", async (req: Request, res: Response) => {
         const subjectRepository = getRepository(Subject);
         const subject = subjectRepository.create(req.body);
@@ -436,7 +435,7 @@ createConnection().then(async connection => {
         res.json(results);
     });
 
-    // Tárgy lekérdezése az azonosítója alapján
+    // Tantárgy lekérése ID alapján
     app.get("/subjects/:subjectId", async (req: Request, res: Response) => {
         const subjectRepository = getRepository(Subject);
         const subject = await subjectRepository.findOne({ 
@@ -447,11 +446,11 @@ createConnection().then(async connection => {
         if (subject) {
             res.json(subject);
         } else {
-            res.status(404).json({ error: "Tárgy nem található" });
+            res.status(404).json({ error: "Tantárgy nem található" });
         }
     });
 
-    // Tárgy frissítése
+    // Tantárgy frissítése ID alapján
     app.put("/subjects/:subjectId", async (req: Request, res: Response) => {
         const subjectRepository = getRepository(Subject);
         const subject = await subjectRepository.findOne({ 
@@ -463,11 +462,11 @@ createConnection().then(async connection => {
             const results = await subjectRepository.save(subject);
             res.json(results);
         } else {
-            res.status(404).json({ error: "Tárgy nem található" });
+            res.status(404).json({ error: "Tantárgy nem található" });
         }
     });
 
-    // Tárgy törlése
+    // Tantárgy törlése ID alapján
     app.delete("/subjects/:subjectId", async (req: Request, res: Response) => {
         const subjectRepository = getRepository(Subject);
         const subject = await subjectRepository.findOne({ 
@@ -476,18 +475,18 @@ createConnection().then(async connection => {
     
         if (subject) {
             await subjectRepository.remove(subject);
-            res.json({ message: "Tárgy eltávolítva" });
+            res.json({ message: "Tantárgy eltávolítva" });
         } else {
-            res.status(404).json({ error: "Tárgy nem található" });
+            res.status(404).json({ error: "Tantárgy nem található" });
         }
     });
 
-    // Tanár hozzáadása a tárgyhoz
+    // Tanár hozzáadása tantárgyhoz
     app.post("/subjects/addteacher/:subjectId/:teacherId", async (req: Request, res: Response) => {
         const subjectRepository = getRepository(Subject);
         const teacherRepository = getRepository(Teacher);
         try {
-          // Tanár keresése azonosító alapján
+          // Tanár keresése ID alapján
           const teacher = await teacherRepository.findOne({ 
             where: { id: Number(req.params.teacherId) }
         });
@@ -496,39 +495,39 @@ createConnection().then(async connection => {
             return res.status(404).json({ error: 'Tanár nem található' });
           }
       
-          // Tárgy keresése azonosító alapján
-          const subject = await subjectRepository.findOne({ 
+          // Tantárgy keresése ID alapján
+          const course = await subjectRepository.findOne({ 
             where: { id: Number(req.params.subjectId) }, 
             relations: ["teachers"]
         });
       
-          if (!subject) {
-            return res.status(404).json({ error: 'Tárgy nem található' });
+          if (!course) {
+            return res.status(404).json({ error: 'Tantárgy nem található' });
           }
       
-          // Tanár hozzáadása a tárgyhoz, ha még nem lett hozzáadva
-          if (!subject.teachers.includes(teacher)) {
-            subject.teachers.push(teacher);
+          // Tanár hozzáadása a tantárgyhoz, ha még nem volt hozzáadva
+          if (!course.teachers.includes(teacher)) {
+            course.teachers.push(teacher);
           }
       
-          // Tárgy mentése az adatbázisba
-          await subjectRepository.save(subject);
+          // Tantárgy mentése az adatbázisba
+          await subjectRepository.save(course);
       
-          // Sikerüzenet visszaküldése
-          return res.status(200).json({ message: 'Tanár hozzáadva a tárgyhoz' });
+          // Sikeres válasz visszaadása
+          return res.status(200).json({ message: 'Tanár hozzáadva a tantárgyhoz' });
         } catch (error) {
           // Hiba kezelése
           console.error(error);
           return res.status(500).json({ error: 'Hiba történt' });
         }
       });
-      
-      // Tanár eltávolítása a tárgyból
-      app.delete('/subjects/removeteacher/:subjectId/:teacherId', async (req: Request, res: Response) => {
+
+    // Tanár eltávolítása tantárgyból
+    app.delete("/subjects/removeteacher/:subjectId/:teacherId", async (req: Request, res: Response) => {
         const subjectRepository = getRepository(Subject);
         const teacherRepository = getRepository(Teacher);
         try {
-          // Tanár keresése azonosító alapján
+          // Tanár keresése ID alapján
           const teacher = await teacherRepository.findOne({ 
             where: { id: Number(req.params.teacherId) }
         });
@@ -537,39 +536,94 @@ createConnection().then(async connection => {
             return res.status(404).json({ error: 'Tanár nem található' });
           }
       
-          // Tárgy keresése azonosító alapján
-          const subject = await subjectRepository.findOne({ 
+          // Tantárgy keresése ID alapján
+          const course = await subjectRepository.findOne({ 
             where: { id: Number(req.params.subjectId) }, 
             relations: ["teachers"]
         });
       
-          if (!subject) {
-            return res.status(404).json({ error: 'Tárgy nem található' });
+          if (!course) {
+            return res.status(404).json({ error: 'Tantárgy nem található' });
           }
       
-          // Ellenőrzés, hogy a tanár már hozzá van-e adva a tárgyhoz
-          const teacherIndex = subject.teachers.findIndex((t) => t.id === teacher.id);
-          if (teacherIndex === -1) {
-            return res.status(404).json({ error: 'A tanár nincs társítva a tárgyhoz' });
-          }
+          // Tanár eltávolítása a tantárgyból
+          course.teachers = course.teachers.filter((t) => t.id !== teacher.id);
       
-          // Tanár eltávolítása a tárgyból
-          subject.teachers.splice(teacherIndex, 1);
+          // Tantárgy mentése az adatbázisba
+          await subjectRepository.save(course);
       
-          // Tárgy mentése az adatbázisba
-          await subjectRepository.save(subject);
-      
-          // Sikerüzenet visszaküldése
-          return res.status(200).json({ message: 'Tanár eltávolítva a tárgyból' });
+          // Sikeres válasz visszaadása
+          return res.status(200).json({ message: 'Tanár eltávolítva a tantárgyból' });
         } catch (error) {
           // Hiba kezelése
           console.error(error);
           return res.status(500).json({ error: 'Hiba történt' });
         }
       });
+
+    // Érdemjegyek lekérése
+    app.get("/grades", async (req: Request, res: Response) => {
+        const gradeRepository = getRepository(Grade);
+        const grades = await gradeRepository.find({ relations: ["student", "course"] });
+        res.json(grades);
+    });
+
+    // Érdemjegy létrehozása
+    app.post("/grades", async (req: Request, res: Response) => {
+        const gradeRepository = getRepository(Grade);
+        const grade = gradeRepository.create(req.body);
+        const results = await gradeRepository.save(grade);
+        res.json(results);
+    });
+
+    // Érdemjegy lekérése ID alapján
+    app.get("/grades/:gradeId", async (req: Request, res: Response) => {
+        const gradeRepository = getRepository(Grade);
+        const grade = await gradeRepository.findOne({ 
+            where: { id: Number(req.params.gradeId) }, 
+            relations: ["student", "course"]
+        });
     
+        if (grade) {
+            res.json(grade);
+        } else {
+            res.status(404).json({ error: "Érdemjegy nem található" });
+        }
+    });
+
+    // Érdemjegy frissítése ID alapján
+    app.put("/grades/:gradeId", async (req: Request, res: Response) => {
+        const gradeRepository = getRepository(Grade);
+        const grade = await gradeRepository.findOne({ 
+            where: { id: Number(req.params.gradeId) }
+        });
+    
+        if (grade) {
+            gradeRepository.merge(grade, req.body);
+            const results = await gradeRepository.save(grade);
+            res.json(results);
+        } else {
+            res.status(404).json({ error: "Érdemjegy nem található" });
+        }
+    });
+
+    // Érdemjegy törlése ID alapján
+    app.delete("/grades/:gradeId", async (req: Request, res: Response) => {
+        const gradeRepository = getRepository(Grade);
+        const grade = await gradeRepository.findOne({ 
+            where: { id: Number(req.params.gradeId) }
+        });
+    
+        if (grade) {
+            await gradeRepository.remove(grade);
+            res.json({ message: "Érdemjegy eltávolítva" });
+        } else {
+            res.status(404).json({ error: "Érdemjegy nem található" });
+        }
+    });
+
     app.listen(3000, () => {
-        console.log("A szerver fut a 3000-es porton");
+        console.log("A szerver fut a 3000-es porton.");
     });
 
 }).catch(error => console.log(error));

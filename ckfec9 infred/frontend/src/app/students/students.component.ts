@@ -4,13 +4,13 @@ import { StudentService } from '../services/student.service';
 
 @Component({
   selector: 'app-students',
-  templateUrl: './students.component.html',
-  styleUrls: ['./students.component.css']
+  templateUrl: './students.component.html', 
+  styleUrls: ['./students.component.css']   
 })
 export class StudentsComponent {
-  students: Student[] = [];
-  selectedStudent?: Student;
-  newStudent: Student = new Student({
+  students: Student[] = [];                 // A diákok tömbje
+  selectedStudent?: Student;                 // Kiválasztott diák
+  newStudent: Student = new Student({       // Az új diák, inicializálása üres diákként
     id: 0,
     name: '',
     department: '',
@@ -19,19 +19,22 @@ export class StudentsComponent {
   });
 
   constructor(private studentService: StudentService) {
-    this.getStudents();
+    this.getStudents();                     // Diákok betöltése komponens inicializáláskor
   }
 
+  // Diákok lekérése a szervízből
   getStudents(): void {
     this.studentService.getStudents().subscribe(students => {
       this.students = students.map(s => new Student(s));
     });
   }
 
+  // Kiválasztott diák kiválasztása
   onSelect(student: Student): void {
     this.selectedStudent = new Student(student);
   }
 
+  // Új diák létrehozása
   createStudent(): void {
     this.studentService.createStudent(this.newStudent).subscribe(student => {
       this.students.push(new Student(student));
@@ -45,6 +48,7 @@ export class StudentsComponent {
     });
   }
 
+  // Diák adatainak frissítése
   updateStudent(): void {
     if (this.selectedStudent && this.selectedStudent.id) {
       this.studentService.updateStudent(this.selectedStudent.id, this.selectedStudent).subscribe(student => {
@@ -56,6 +60,7 @@ export class StudentsComponent {
     }
   }
 
+  // Diák törlése
   deleteStudent(): void {
     if (this.selectedStudent && this.selectedStudent.id) {
       this.studentService.deleteStudent(this.selectedStudent.id).subscribe(() => {

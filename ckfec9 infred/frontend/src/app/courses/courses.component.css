@@ -1,0 +1,17 @@
+.card-header {
+    background-color: rgb(185, 185, 207);
+    border: 2px solid #000000;
+    border-radius: 25px;
+    text-align: center;
+  }
+
+
+.card.mb-3 {
+    background-color: rgb(210, 210, 224);
+    border-radius: 25px;
+    padding: 20px;
+  }
+
+  .btn.btn-primary {
+    margin-top: 10px;
+  }
